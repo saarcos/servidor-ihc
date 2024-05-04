@@ -1,0 +1,27 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1712930921711,
+      "tag": "0000_romantic_stepford_cuckoos",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1713062469489,
+      "tag": "0001_hesitant_maestro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1713322148206,
+      "tag": "0002_gigantic_quentin_quire",
+      "breakpoints": true
+    }
+  ]
+}

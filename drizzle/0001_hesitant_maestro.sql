@@ -1,0 +1,1 @@
+ALTER TABLE "plato" ALTER COLUMN "foto" SET DATA TYPE varchar(255);
