@@ -299,26 +299,119 @@ router.post('/usuario', async (req: Request, res: Response) => {
   });
   
   //Usuarios
-router.get('/usuarios', async(req:Request,res:Response)=>{
-  try {
-    const rows=await db.select().from(usuarios);
-    res.json(rows);
-  } catch (error) {
-    handleQueryError(error,res);
-  }
-});
-router.get('/usuarios/:email', async (req: Request, res: Response) => {
-  try {
-    const { email } = req.params;
-    const rows = await db.select().from(usuarios).where(eq(usuarios.correo, email));
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found.' });
+  router.get('/usuarios', async(req:Request,res:Response)=>{
+    try {
+      const rows=await db.select().from(usuarios);
+      res.json(rows);
+    } catch (error) {
+      handleQueryError(error,res);
     }
-    res.json(rows[0]);
-  } catch (err) {
-    handleQueryError(err, res);
-  }
-});
+  });
+
+  //Obtener Usuario por id
+  router.get('/usuarios/:id', async (req: Request, res: Response) => { 
+    const id = req.params.id;
+    try { 
+      const user = await db.select().from(usuarios).where(eq(usuarios.id, +id));
+      if (user.length === 0) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+      res.json(user[0]); 
+    } catch (error) { 
+      handleQueryError(error, res); 
+    } 
+  });
+
+  //Update: info del usuario 
+  router.put('/usuario/:id', async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const { nombre, apellido, telefono} = req.body;
+      const resultado = await db.update(usuarios)
+                            .set({ nombre, apellido, telefono})
+                            .where(eq(usuarios.id, +id))
+                            .execute();
+    
+      if (resultado.rowCount > 0) {
+        res.status(200).json({ message: 'Usuario modificado correctamente' });
+      } else {
+        res.status(404).json({ error: 'No se encontró el usuario' });
+      }
+    } catch (err) {
+      handleQueryError(err, res);
+    }
+  });
+  
+  //Update: password del usuario
+  router.put('/usuarios/:id', async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const { password_usuario } = req.body;
+  
+      const resultado = await db.update(usuarios)
+                            .set({ password_usuario })
+                            .where(eq(usuarios.id, +id))
+                            .execute();
+  
+      if (resultado && resultado.rowCount > 0) {
+        res.status(200).json({ message: 'Contraseña actualizada' });
+      } else {
+        res.status(404).json({ error: 'No se encontró el usuario o la contraseña no se pudo actualizar' });
+      }
+    } catch (err) {
+      console.error('Error executing query:', err.message, err.stack);
+      res.status(500).json({ error: 'An error occurred while executing the query.' });
+    }
+  });
+  
+  //Obtener el id de Usuario por su correo
+  router.get('/usuario/:correo', async (req: Request, res: Response) => {
+    try {
+      const { correo } = req.params;
+
+      // Consulta para obtener el ID del usuario por su correo
+      const usuarioResult = await db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.correo, correo));
+      
+      if (usuarioResult.length > 0) {
+        res.status(200).json({ id: usuarioResult[0].id });
+      } else {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+    } catch (err) {
+      handleQueryError(err, res);
+    }
+  });
+
+  //Delete de usuario
+  router.delete('/usuarios/:id', async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const resultado = await db.delete(usuarios).where(eq(usuarios.id, +id)).execute();
+      if (resultado.rowCount > 0) {
+        res.status(200).json({ message: 'Usuario eliminado correctamente' });
+      } else {
+        res.status(404).json({ error: 'No se encontró el usuario' });
+      }
+    } catch (err) {
+      handleQueryError(err, res);
+    }
+  });
+
+
+
+  router.get('/usuarios/:email', async (req: Request, res: Response) => {
+    try {
+      const { email } = req.params;
+      const rows = await db.select().from(usuarios).where(eq(usuarios.correo, email));
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Product not found.' });
+      }
+      res.json(rows[0]);
+    } catch (err) {
+      handleQueryError(err, res);
+    }
+  });
+
 
 //Get Usuarios Admin Restaurante by email
 router.get('/usuariosAdmin/:email', async (req: Request, res: Response) => {
@@ -334,19 +427,6 @@ router.get('/usuariosAdmin/:email', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/usuarios/:id', async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const resultado = await db.delete(usuarios).where(eq(usuarios.id, +id)).execute();
-    if (resultado.rowCount > 0) {
-      res.status(200).json({ message: 'Usuario eliminado correctamente' });
-    } else {
-      res.status(404).json({ error: 'No se encontró el usuario' });
-    }
-  } catch (err) {
-    handleQueryError(err, res);
-  }
-});
 
 //Verificar si el correo es de Restaurante o de Usuario
 router.get('/verificarCorreo/:correo', async (req: Request, res: Response) => {
