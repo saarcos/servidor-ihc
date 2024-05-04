@@ -398,8 +398,7 @@ router.post('/usuario', async (req: Request, res: Response) => {
   });
 
 
-
-  router.get('/usuarios/:email', async (req: Request, res: Response) => {
+  router.get('/usuarioCorreo/:email', async (req: Request, res: Response) => {
     try {
       const { email } = req.params;
       const rows = await db.select().from(usuarios).where(eq(usuarios.correo, email));
