@@ -320,6 +320,20 @@ router.get('/usuarios/:email', async (req: Request, res: Response) => {
   }
 });
 
+//Get Usuarios Admin Restaurante by email
+router.get('/usuariosAdmin/:email', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.params;
+    const rows = await db.select().from(restaurantes).where(eq(restaurantes.correo, email));
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found.' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
+
 router.delete('/usuarios/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
