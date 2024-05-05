@@ -280,6 +280,25 @@ router.delete('/reservas/:id', async (req: Request, res: Response) => {
     handleQueryError(err, res);
   }
 });
+//Actualizar Reservas
+router.put('/reservas/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const { id_restaurante, id_usuario, fecha, hora, num_personas, estado } = req.body;
+    const resultado = await db.update(reservas)
+                          .set({ id_restaurante, id_usuario, fecha, hora, num_personas, estado})
+                          .where(eq(reservas.id, +id))
+                          .execute();
+
+    if (resultado.rowCount > 0) {
+      res.status(200).json({ message: 'Reserva modificada correctamente' });
+    } else {
+      res.status(404).json({ error: 'No se encontró la reserva' });
+    }
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
 
 // Crea un nuevo usuario
 router.post('/usuario', async (req: Request, res: Response) => {
