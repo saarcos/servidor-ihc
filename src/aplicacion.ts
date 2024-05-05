@@ -25,18 +25,19 @@ router.get('/restaurantes', async (req: Request, res: Response) => {
 });
 
 // Get a single product by ID
-router.get('/restaurantes/:id', async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const rows = await db.select().from(restaurantes).where(eq(restaurantes.id, +id));
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found.' });
+router.get('/restaurantes/:id', async (req: Request, res: Response) => { 
+  const id = req.params.id;
+  try { 
+    const user = await db.select().from(restaurantes).where(eq(restaurantes.id, +id));
+    if (user.length === 0) {
+      return res.status(404).json({ error: "Restaurante no encontrado" });
     }
-    res.json(rows[0]);
-  } catch (err) {
-    handleQueryError(err, res);
-  }
+    res.json(user[0]); 
+  } catch (error) { 
+    handleQueryError(error, res); 
+  } 
 });
+
 // Crea un nuevo restaurante
 router.post('/restaurantes', async (req: Request, res: Response) => {
     try {
@@ -69,6 +70,28 @@ router.post('/restaurantes', async (req: Request, res: Response) => {
     }
   } catch (err) {
     handleQueryError(err, res);
+  }
+});
+
+//Update: password del restaurante
+router.put('/restaurantes/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const { password_restaurante } = req.body;
+
+    const resultado = await db.update(restaurantes)
+                          .set({ password_restaurante })
+                          .where(eq(restaurantes.id, +id))
+                          .execute();
+
+    if (resultado && resultado.rowCount > 0) {
+      res.status(200).json({ message: 'Contraseña actualizada' });
+    } else {
+      res.status(404).json({ error: 'No se encontró el restaurante o la contraseña no se pudo actualizar' });
+    }
+  } catch (err) {
+    console.error('Error executing query:', err.message, err.stack);
+    res.status(500).json({ error: 'An error occurred while executing the query.' });
   }
 });
 
