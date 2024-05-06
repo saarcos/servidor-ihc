@@ -14,6 +14,84 @@ const handleQueryError = (err: any, res: Response) => {
   res.status(500).json({ error: 'An error occurred while executing the query.' });
 };
 
+//categorias
+// Crear una nueva categoría
+router.post('/categorias', async (req: Request, res: Response) => {
+  try {
+    const { nombre} = req.body;
+    const resultado = await db.insert(categorias).values({ nombre }).execute();
+
+    if (resultado.rowCount > 0) {
+      res.status(201).json({ message: 'Categoría creada correctamente' });
+    } else {
+      res.status(500).json({ error: 'No se pudo crear la categoría.' });
+    }
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
+
+// Obtener todas las categorías
+router.get('/categorias', async (req: Request, res: Response) => {
+  try {
+    const rows = await db.select().from(categorias);
+    res.json(rows);
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
+
+// Obtener una categoría por ID
+router.get('/categorias/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const rows = await db.select().from(categorias).where(eq(categorias.id, +id));
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Categoría no encontrada.' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
+
+// Modificar una categoría
+router.put('/categorias/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const { nombre} = req.body;
+    const resultado = await db.update(categorias)
+                          .set({ nombre})
+                          .where(eq(categorias.id, +id))
+                          .execute();
+
+    if (resultado.rowCount > 0) {
+      res.status(200).json({ message: 'Categoría modificada correctamente' });
+    } else {
+      res.status(404).json({ error: 'No se encontró la categoría' });
+    }
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
+
+// Eliminar una categoría
+router.delete('/categorias/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const resultado = await db.delete(categorias)
+                          .where(eq(categorias.id, +id))
+                          .execute();
+
+    if (resultado.rowCount > 0) {
+      res.status(200).json({ message: 'Categoría eliminada correctamente' });
+    } else {
+      res.status(404).json({ error: 'No se encontró la categoría' });
+    }
+  } catch (err) {
+    handleQueryError(err, res);
+  }
+});
 // Get all products
 router.get('/restaurantes', async (req: Request, res: Response) => {
   try {
