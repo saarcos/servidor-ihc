@@ -11,7 +11,13 @@ const db = drizzle(pool);
 // Error handler for database queries
 const handleQueryError = (err: any, res: Response) => {
   console.error('Error executing query:', err);
-  res.status(500).json({ error: 'An error occurred while executing the query.' });
+
+  let errorMessage = 'An error occurred while executing the query.';
+  if (err.message.includes('aforo')) {
+    errorMessage = err.message;
+  }
+
+  res.status(500).json({ error: errorMessage });
 };
 
 //categorias
